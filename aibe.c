@@ -1,17 +1,18 @@
-#include <cstdlib>
-#include <cstdio>
+
+#include <stdio.h>
 
 #include "aibe.h"
 
-void check(bool b);
+void check(int b);
 
 int main(int argc, char **argv) {
     pairing_t pairing;
     char param[1024];
-    FILE *param_file = fopen(file_path, "r+");
-    size_t count = fread(param, 1, 1024, param_file);
+    FILE *param_file = fopen(file_path, "r");
+    size_t count = fread(param, sizeof(char), 1024, param_file);
     if (!count) pbc_die("input error");
     pairing_init_set_buf(pairing, param, count);
+
 
 ////    elements
     // param elements
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
 ////    element init
     element_init_Zr(x, pairing);
     element_init_G2(g, pairing);
-    mpk.init(pairing);
+    mpk_init(&mpk, pairing);
 
     element_init_G1(Hz, pairing);
     element_init_Zr(t0, pairing);
@@ -56,8 +57,8 @@ int main(int argc, char **argv) {
 
     element_init_Zr(r1, pairing);
     element_init_Zr(t1, pairing);
-    dk1.init(pairing);
-    dk.init(pairing);
+    dk_init(&dk, pairing);
+    dk_init(&dk1, pairing);
 
     element_init_Zr(tz, pairing);
     element_init_G1(tg, pairing);
@@ -87,7 +88,7 @@ int main(int argc, char **argv) {
 
     {
         mpz_t digit;
-        for (int i = 1; i <= mpk.z_size; ++i) {
+        for (int i = 1; i <= z_size; ++i) {
             mpz_init_set_si(digit, get_bit(ID, i));
             if (!mpz_is0(digit))
                 element_mul(Hz, Hz, mpk.Z[i]);
@@ -198,7 +199,7 @@ int main(int argc, char **argv) {
     // repl: element_clear($2)
     element_clear(x);
     element_clear(g);
-    mpk.clear();
+    mpk_clear(&mpk);
 
     element_clear(Hz);
     element_clear(t0);
@@ -211,8 +212,8 @@ int main(int argc, char **argv) {
 
     element_clear(r1);
     element_clear(t1);
-    dk1.clear();
-    dk.clear();
+    dk_clear(&dk);
+    dk_clear(&dk1);
 
     element_clear(tz);
     element_clear(tg);
@@ -221,7 +222,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void check(bool b) {
+void check(int b) {
     if (b) {
         puts("not equal");
     } else {
@@ -233,32 +234,32 @@ int get_bit(int id, int n) {
     return (id >> (N - n)) & 1;
 }
 
-void mpk_t::init(pairing_t pairing) {
-    element_init_G1(h, pairing);
-    element_init_G1(X, pairing);
-    element_init_G1(Y, pairing);
+void mpk_init(mpk_t *mpk, pairing_t pairing) {
+    element_init_G1(mpk->h, pairing);
+    element_init_G1(mpk->X, pairing);
+    element_init_G1(mpk->Y, pairing);
     for (int i = 0; i <= N; ++i) {
-        element_init_G1(Z[i], pairing);
+        element_init_G1(mpk->Z[i], pairing);
     }
 }
 
-void mpk_t::clear() {
-    element_clear(h);
-    element_clear(X);
-    element_clear(Y);
+void mpk_clear(mpk_t *mpk) {
+    element_clear(mpk->h);
+    element_clear(mpk->X);
+    element_clear(mpk->Y);
     for (int i = 0; i <= N; ++i) {
-        element_clear(Z[i]);
+        element_clear(mpk->Z[i]);
     }
 }
 
-void dk_t::init(pairing_t pairing) {
-    element_init_G1(d1, pairing);
-    element_init_G1(d2, pairing);
-    element_init_Zr(d3, pairing);
+void dk_init(dk_t *dk, pairing_t pairing) {
+    element_init_G1(dk->d1, pairing);
+    element_init_G1(dk->d2, pairing);
+    element_init_Zr(dk->d3, pairing);
 }
 
-void dk_t::clear() {
-    element_clear(d1);
-    element_clear(d2);
-    element_clear(d3);
+void dk_clear(dk_t *dk) {
+    element_clear(dk->d1);
+    element_clear(dk->d2);
+    element_clear(dk->d3);
 }
