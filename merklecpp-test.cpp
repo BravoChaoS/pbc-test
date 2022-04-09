@@ -6,7 +6,6 @@
 
 void sha256(const std::string &srcStr, std::string &encodedHexStr)
 {
-
     unsigned char mdStr[33] = { 0 };
     SHA256((const unsigned char *)srcStr.c_str(), srcStr.length(), mdStr);// 调用sha256哈希
 

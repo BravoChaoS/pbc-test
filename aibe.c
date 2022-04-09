@@ -8,7 +8,7 @@ void check(int b);
 int main(int argc, char **argv) {
     pairing_t pairing;
     char param[1024];
-    FILE *param_file = fopen(file_path, "r");
+    FILE *param_file = fopen(param_path, "r");
     size_t count = fread(param, sizeof(char), 1024, param_file);
     if (!count) pbc_die("input error");
     pairing_init_set_buf(pairing, param, count);
@@ -77,6 +77,18 @@ int main(int argc, char **argv) {
     element_pow_zn(mpk.X, g, x);
 
     puts("pkg: setup finished");
+
+    FILE *fpk_in = fopen(mpk_path, "r+");
+    FILE *fpk_out = fopen(mpk_path, "w+");
+    int n = pairing_length_in_bytes_compressed_G1(pairing);
+
+    unsigned char data[n];
+    element_to_bytes_compressed(data, g);
+    fwrite(data, n, 1, fpk_out);
+
+    fread(data, n, 1, fpk_in);
+    element_from_bytes_compressed(g, data);
+    element_printf("%B\n", g);
 
 ////    keygen1: user
     puts("usr: keygen1...");

@@ -11,7 +11,9 @@
 #define N 8
 const int z_size = N + 1;
 const int ID = 0b10101010;
-const char file_path[] = "param/aibe.param";
+const char param_path[] = "param/aibe.param";
+const char mpk_path[] = "param/mpk.out";
+const char msk_path[] = "param/msk.out";
 
 
 typedef struct mpk_t {
