@@ -1,9 +1,9 @@
 /media/jojjiw/EX/ub-space/A-IBE/pbc-test/bin/aibe
 keygen1(ms): 1.88856
-keygen2(ms): 3.61917
+keygen2(ms): 3.63917
 keygen3(ms): 5.07353
 encrypt(ms): 3.11607
-decrypt(ms): 1.22235
+decrypt(ms): 1.23235
 
 pairing(ms): 0.567554
 pow_zn(ms): 0.885332
