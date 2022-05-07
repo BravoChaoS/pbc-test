@@ -1,5 +1,5 @@
 EXEC := \
-	aibe \
+	pbc-test \
 	param-generator \
 
 
@@ -8,16 +8,23 @@ BIN := bin
 
 OBJ := $(addsuffix .o,$(EXEC))
 
-all: bin aibe param-generator merklecpp-test
+all: bin aibe pbc-test param-generator merklecpp-test
 
 bin:
 	mkdir -p $(BIN)
 
-aibe.o: aibe.c bin
+pbc-test.o: pbc-test.cpp bin
+	$(CC) -c -o $(BIN)/$@ $<
+
+pbc-test: pbc-test.o bin
+	$(CXX) -o $(BIN)/$@ $(BIN)/$< -L. $(LD_LIBS)
+
+
+aibe.o: aibe.cpp bin
 	$(CC) -c -o $(BIN)/$@ $<
 
 aibe: aibe.o bin
-	$(CC) -o $(BIN)/$@ $(BIN)/$< -L. $(LD_LIBS)
+	$(CXX) -o $(BIN)/$@ $(BIN)/$< -L. $(LD_LIBS)
 
 param-generator.o: param-generator.cpp bin
 	$(CXX) -c -o $(BIN)/$@ $<

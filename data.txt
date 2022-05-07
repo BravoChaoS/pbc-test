@@ -1,0 +1,13 @@
+keygen1(ms): 1.86322
+keygen2(ms): 3.66631
+keygen3(ms): 5.05089
+encrypt(ms): 3.14962
+decrypt(ms): 1.21055
+
+pairing(ms): 0.576041
+pow_zn(ms): 0.948752
+gt_pow_zn(ms): 0.073135
+mul(ms): 0.002909
+div(ms): 0.003149
+
+Process finished with exit code 0
