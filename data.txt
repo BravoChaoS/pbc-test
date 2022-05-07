@@ -1,13 +1,19 @@
-keygen1(ms): 1.86322
-keygen2(ms): 3.66631
-keygen3(ms): 5.05089
-encrypt(ms): 3.14962
-decrypt(ms): 1.21055
+/media/jojjiw/EX/ub-space/A-IBE/pbc-test/bin/aibe
+keygen1(ms): 1.88856
+keygen2(ms): 3.61917
+keygen3(ms): 5.07353
+encrypt(ms): 3.11607
+decrypt(ms): 1.22235
 
-pairing(ms): 0.576041
-pow_zn(ms): 0.948752
-gt_pow_zn(ms): 0.073135
-mul(ms): 0.002909
-div(ms): 0.003149
+pairing(ms): 0.567554
+pow_zn(ms): 0.885332
+gt_pow_zn(ms): 0.071159
+mul(ms): 0.002904
+
+keygen1(est): 1.85433
+keygen2(est): 3.6308
+keygen3(est): 5.02149
+encrypt(est): 3.06059
+decrypt(est): 1.22458
 
 Process finished with exit code 0

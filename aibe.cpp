@@ -86,6 +86,9 @@ int main(){
     element_init_Zr(zr, aibeAlgo.pairing);
     element_init_GT(gt, aibeAlgo.pairing);
 
+    double bp, ep_g1, ep_gt, bm, hw;
+    hw = 0.0096;
+
     sum = 0;
     for (int i = 0; i < na; ++i) {
         element_random(a);
@@ -98,7 +101,7 @@ int main(){
         e = clock();
         sum += e - s;
     }
-    printf("pairing(ms): %lf\n", double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
+    printf("pairing(ms): %lf\n", bp = double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
 
     sum = 0;
     for (int i = 0; i < na; ++i) {
@@ -112,7 +115,7 @@ int main(){
         e = clock();
         sum += e - s;
     }
-    printf("pow_zn(ms): %lf\n", double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
+    printf("pow_zn(ms): %lf\n", ep_g1 = double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
 
     sum = 0;
     for (int i = 0; i < na; ++i) {
@@ -126,7 +129,7 @@ int main(){
         e = clock();
         sum += e - s;
     }
-    printf("gt_pow_zn(ms): %lf\n", double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
+    printf("gt_pow_zn(ms): %lf\n", ep_gt = double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
 
     sum = 0;
     for (int i = 0; i < na; ++i) {
@@ -140,21 +143,13 @@ int main(){
         e = clock();
         sum += e - s;
     }
-    printf("mul(ms): %lf\n", double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
+    printf("mul(ms): %lf\n", bm = double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
 
-    sum = 0;
-    for (int i = 0; i < na; ++i) {
-        element_random(a);
-        element_random(b);
-
-        s = clock();
-        for (int j = 0; j < nb; ++j) {
-            element_div(g1, a, b);
-        }
-        e = clock();
-        sum += e - s;
-    }
-    printf("div(ms): %lf\n", double(sum) / (na * nb / 1000) / CLOCKS_PER_SEC);
+    std::cout << "keygen1(est): " << 0 * bp + 2 * ep_g1 + 1 * ep_gt + 1 * bm + hw<< std::endl;
+    std::cout << "keygen2(est): " << 0 * bp + 4 * ep_g1 + 1 * ep_gt + 3 * bm + hw<< std::endl;
+    std::cout << "keygen3(est): " << 4 * bp + 3 * ep_g1 + 1 * ep_gt + 5 * bm + hw<< std::endl;
+    std::cout << "encrypt(est): " << 2 * bp + 2 * ep_g1 + 2 * ep_gt + 1 * bm + hw<< std::endl;
+    std::cout << "decrypt(est): " << 2 * bp + 0 * ep_g1 + 1 * ep_gt + 3 * bm + hw<< std::endl;
 
     return 0;
 }
