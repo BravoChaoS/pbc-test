@@ -5,9 +5,9 @@ encrypt(ms): 3.14962
 decrypt(ms): 1.21055
 
 pairing(ms): 0.576041
-pow_zn(ms): 0.948752
+pow_zn(ms): 0.887521
 gt_pow_zn(ms): 0.073135
-mul(ms): 0.002909
+mul(ms): 0.003109
 div(ms): 0.003149
 
 Process finished with exit code 0
