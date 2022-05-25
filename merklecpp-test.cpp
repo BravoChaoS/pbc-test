@@ -1,40 +1,69 @@
 #include "merklecpp.h"
 #include <iostream>
 #include <cstdio>
-
-#include <openssl/sha.h>
-
-void sha256(const std::string &srcStr, std::string &encodedHexStr)
-{
-    unsigned char mdStr[33] = { 0 };
-    SHA256((const unsigned char *)srcStr.c_str(), srcStr.length(), mdStr);// 调用sha256哈希
-
-    char buf[65] = { 0 };
-    char tmp[3] = { 0 };
-    for (int i = 0; i < 32; i++)// 哈希后的十六进制串 32字节
-    {
-        sprintf(tmp, "%02x", mdStr[i]);
-        strcat(buf, tmp);
-    }
-    buf[64] = '\0'; // 后面都是0，从32字节截断
-    encodedHexStr = std::string(buf);
-}
+#include "log.h"
 
 int main(){
-    merkle::TreeT<32, merkle::sha256_openssl> tree;
+    LogTree logTree;
+    Proofs proofs;
+    std::string srcStr = "01010101", encodedHexStr;
 
-    std::string srcStr = "message", encodedHexStr;
+    time_t start, end;
 
-    sha256(srcStr, encodedHexStr);
+    int ni = 20, nj = 1000;
 
-    merkle::Hash hash(encodedHexStr);
-    std::vector<merkle::Tree::Hash> hashes;
-    hashes.push_back(hash);
-    for (auto h : hashes)
-    tree.insert(h);
-    auto root = tree.root();
-    auto path = tree.path(hashes.size() - 1);
-    assert(path->verify(root));
-    std::cout << "verify succeed" << std::endl;
+    int size;
+    for (int i = 0; i < ni; ++i) {
+        for (int j = 0; j < nj; ++j) {
+
+            srcStr = std::to_string(i * j);
+            sha256(srcStr, encodedHexStr);
+            ChronTreeT::Hash hash(encodedHexStr);
+            logTree.append(hash, proofs);
+        }
+        size = logTree.chronTree.size();
+//        std::cout << (i + 1) * nj << ' ' << size * logTree.chronTree.get_node_size() << std::endl;
+
+        int sum = 0;
+        int maxsize = logTree.chronTree.max_index();
+        start = clock();
+        int ind = random() % maxsize;
+        for (int j = 0; j < 1000; ++j) {
+            std::shared_ptr<ChronTreeT::Path> path = logTree.chronTree.path(ind);
+//            for (int k = 0; k < 10; ++k) {
+//                path->verify(logTree.chronTree.root());
+//            }
+        }
+        end = clock();
+        sum += end - start;
+
+        std::cout << double(sum) / CLOCKS_PER_SEC << std::endl;
+    }
+    std::cout << std::endl;
     return 0;
+}
+
+size_t physical_memory_used_by_process()
+{
+    FILE* file = fopen("/proc/self/status", "r");
+    int result = -1;
+    char line[128];
+
+    while (fgets(line, 128, file) != nullptr) {
+        if (strncmp(line, "VmRSS:", 6) == 0) {
+            int len = strlen(line);
+
+            const char* p = line;
+            for (; std::isdigit(*p) == false; ++p) {}
+
+            line[len - 3] = 0;
+            result = atoi(p);
+
+            break;
+        }
+    }
+
+    fclose(file);
+
+    return result;
 }

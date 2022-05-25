@@ -692,6 +692,10 @@ namespace merkle
       *this = other;
     }
 
+    int get_node_size() {
+        return sizeof(Node);
+    }
+
     /// @brief Moves a tree
     /// @param other Tree to move
     TreeT(TreeT&& other) :
