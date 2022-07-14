@@ -10,10 +10,11 @@ int main(){
 
     time_t start, end;
 
-    int ni = 20, nj = 1000;
+    int ni = 10, nj = 1000;
 
     int size;
-    for (int i = 0; i < ni; ++i) {
+    for (int i = 0; i <= ni; ++i) {
+//        std::cout << (1 << i) << ' ' << (1 << (i + 1)) << std::endl;
         for (int j = 0; j < nj; ++j) {
 
             srcStr = std::to_string(i * j);
@@ -21,23 +22,20 @@ int main(){
             ChronTreeT::Hash hash(encodedHexStr);
             logTree.append(hash, proofs);
         }
-        size = logTree.chronTree.size();
 //        std::cout << (i + 1) * nj << ' ' << size * logTree.chronTree.get_node_size() << std::endl;
 
         int sum = 0;
         int maxsize = logTree.chronTree.max_index();
+//        std::cout << maxsize << std::endl;
+        std::shared_ptr<ChronTreeT::Path> path = logTree.chronTree.path(1);
         start = clock();
-        int ind = random() % maxsize;
-        for (int j = 0; j < 1000; ++j) {
-            std::shared_ptr<ChronTreeT::Path> path = logTree.chronTree.path(ind);
-//            for (int k = 0; k < 10; ++k) {
-//                path->verify(logTree.chronTree.root());
-//            }
+        for (int k = logTree.chronTree.min_index(); k <= logTree.chronTree.max_index(); ++k) {
+            logTree.chronTree.leaf(k);
         }
         end = clock();
         sum += end - start;
 
-        std::cout << double(sum) / CLOCKS_PER_SEC << std::endl;
+        std::cout << (i + 1) * nj << ' ' << double(sum) / 1000 << std::endl;
     }
     std::cout << std::endl;
     return 0;
