@@ -8,9 +8,9 @@
 #include <pbc/pbc.h>
 #include <pbc/pbc_test.h>
 
-const char path[] = "param/pbc-test.param";
+const char path[] = "param/aibe.param";
 const int rbits = 160;
-const int qbits = 512; // lambda
+const int qbits = (4 << 6); // lambda
 
 int main(int argc, char **argv) {
     FILE *file = fopen(path, "w+");
@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
     pbc_param_init_a_gen(p, rbits, qbits);
 
     pbc_param_out_str(file, p);
+
+
 
 
 

@@ -10,11 +10,11 @@
 #include <cmath>
 #include <cstring>
 
-#define N 8
+#define N ((int)(1 << 4))
 #define BLOCK_MAX 8
 
 const int z_size = N + 1;
-const int ID = 0b10101010;
+const int ID = 0b1010101010101010;
 const char param_path[] = "param/aibe.param";
 const char mpk_path[] = "param/mpk.out";
 const char msk_path[] = "param/msk.out";
@@ -34,7 +34,7 @@ typedef struct dk_t {
 
 typedef struct ct_t {
     element_t c1, c2, c3, c4; // G1, G1, GT, GT
-} ct_t;
+};
 
 void ct_init(ct_t *ct, pairing_t pairing);
 
@@ -114,6 +114,8 @@ public:
     void keygen2();
 
     int keygen3();
+
+    int key_verify();
 
     int block_encrypt(int id);
 
@@ -304,7 +306,7 @@ void AibeAlgo::pkg_setup_generate() {
     }
     element_pow_zn(mpk.X, g, x);
 
-    uint8_t buffer[1024];
+    uint8_t buffer[10240];
 
     element_to_bytes_compressed(buffer, g);
     fwrite(buffer, size_comp_G2, 1, fpk);
@@ -597,16 +599,17 @@ int AibeAlgo::block_decrypt() {
 int AibeAlgo::encrypt(uint8_t *ct_buf, const char *str, int id) {
     int len = strlen(str);
     int block_num = (len % size_msg_block) ? len / size_msg_block + 1: len / size_msg_block;
-    uint8_t strbuf[block_num * size_msg_block];
-
-    memset(strbuf, 0, sizeof(strbuf));
-    strcpy((char *)strbuf, str);
+//    uint8_t strbuf[block_num * size_msg_block];
+//
+//    memset(strbuf, 0, sizeof(strbuf));
+//    strcpy((char *)strbuf, str);
 
     for (int i = 0; i < block_num; ++i) {
+//        puts("After: "); puts(str);
         element_random(m);
         block_encrypt(id);
         element_to_bytes(ct_buf + i * size_block, m);
-        data_xor(ct_buf + i * size_block, strbuf + i * size_msg_block, ct_buf + i * size_block, size_msg_block);
+        data_xor(ct_buf + i * size_block, (uint8_t * )str + i * size_msg_block, ct_buf + i * size_block, size_msg_block);
         ct_store(ct_buf + i * size_block + size_msg_block);
     }
 
@@ -626,6 +629,27 @@ void AibeAlgo::decrypt(uint8_t *msg, uint8_t *data, int size) {
     msg[block_num * size_msg_block] = '\0';
 
 //    printf("%s\n", msg);
+}
+
+int AibeAlgo::key_verify() {
+    int ret = 0;
+
+    //  el = e(d1, X)
+    element_pairing(el, dk.d1, mpk.X);
+    //  er = e(Y, g)
+    element_pairing(er, mpk.Y, g);
+    //  er = er * e(h, g)^d3
+    element_pairing(te, mpk.h, g);
+    element_pow_zn(te, te, dk.d3);
+    element_mul(er, er, te);
+    //  er = er * e(Hz, d2)
+    element_pairing(te, Hz, dk.d2);
+    element_mul(er, er, te);
+
+    if (element_cmp(el, er)) {
+        ret = -1;
+    }
+    return ret;
 }
 
 void data_xor(uint8_t *out, const uint8_t *d1, const uint8_t *d2, int size) {

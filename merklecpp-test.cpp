@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include "log.h"
+#include <cmath>
 
 int main(){
     LogTree logTree;
@@ -10,14 +11,27 @@ int main(){
 
     time_t start, end;
 
-    int ni = 10, nj = 1000;
+    int ni = 13, nj = 1000, ni2 = 1;
 
     int size;
-    for (int i = 0; i <= ni; ++i) {
-//        std::cout << (1 << i) << ' ' << (1 << (i + 1)) << std::endl;
-        for (int j = 0; j < nj; ++j) {
+    for (int i = 0; i < (1 << ni2); ++i) {
+        srcStr = std::to_string(i);
+        sha256(srcStr, encodedHexStr);
+        ChronTreeT::Hash hash(encodedHexStr);
+        logTree.append(hash, proofs);
+    }
 
-            srcStr = std::to_string(i * j);
+    for (int i = ni2; i <= ni; ++i) {
+//        std::cout << (1 << i) << ' ' << (1 << (i + 1)) << std::endl;
+        std::shared_ptr<ChronTreeT::Path> poe;
+        ChronTreeT::Hash old_rth;
+
+        for (int j = (1 << i); j < (1 << (i + 1)); ++j) {
+            if(j == (1 << (i + 1)) - 1){
+                poe = logTree.chronTree.path(logTree.chronTree.max_index());
+                old_rth = logTree.chronTree.root();
+            }
+            srcStr = std::to_string(j);
             sha256(srcStr, encodedHexStr);
             ChronTreeT::Hash hash(encodedHexStr);
             logTree.append(hash, proofs);
@@ -26,16 +40,20 @@ int main(){
 
         int sum = 0;
         int maxsize = logTree.chronTree.max_index();
-//        std::cout << maxsize << std::endl;
-        std::shared_ptr<ChronTreeT::Path> path = logTree.chronTree.path(1);
+//        std::cout << logTree.chronTree.min_index() << ' ' << maxsize << std::endl;
+        std::shared_ptr<ChronTreeT::Path> pop = logTree.chronTree.path(maxsize);
+        ChronTreeT::Hash new_rth = logTree.chronTree.root();
         start = clock();
-        for (int k = logTree.chronTree.min_index(); k <= logTree.chronTree.max_index(); ++k) {
-            logTree.chronTree.leaf(k);
+        for (int j = 0; j < 1000; ++j) {
+            assert(pop->verify(new_rth));
+            assert(poe->verify(old_rth));
         }
+
         end = clock();
         sum += end - start;
 
-        std::cout << (i + 1) * nj << ' ' << double(sum) / 1000 << std::endl;
+        std::cout << '(' << std::log2(1 << (i + 1)) << ',' << double(sum) / CLOCKS_PER_SEC << ')';
+        std::cout << std::endl;
     }
     std::cout << std::endl;
     return 0;
