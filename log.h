@@ -4,26 +4,33 @@
 
 #ifndef LM_LOG_H
 #define LM_LOG_H
+
 #include "merklecpp.h"
 #include <iostream>
 #include <cstdio>
+#include <map>
+#include <vector>
+#include <chrono>
+#include <sys/time.h>
+#include "json.hpp"
 
 #include <openssl/sha.h>
+
+using json = nlohmann::json;
 
 typedef merkle::TreeT<32, merkle::sha256_openssl> ChronTreeT;
 
 
-typedef struct _log_header_t{
+typedef struct _log_header_t {
     uint32_t size[3];
-}log_header_t;
+} log_header_t;
 
-void sha256(const std::string &srcStr, std::string &encodedHexStr)
-{
-    unsigned char mdStr[33] = { 0 };
-    SHA256((const unsigned char *)srcStr.c_str(), srcStr.length(), mdStr);// 调用sha256哈希
+void sha256(const std::string &srcStr, std::string &encodedHexStr) {
+    unsigned char mdStr[33] = {0};
+    SHA256((const unsigned char *) srcStr.c_str(), srcStr.length(), mdStr);// 调用sha256哈希
 
-    char buf[65] = { 0 };
-    char tmp[3] = { 0 };
+    char buf[65] = {0};
+    char tmp[3] = {0};
     for (int i = 0; i < 32; i++)// 哈希后的十六进制串 32字节
     {
         sprintf(tmp, "%02x", mdStr[i]);
@@ -121,10 +128,13 @@ int Proofs::deserialise(uint8_t *bytes) {
 class LogTree {
 public:
     ChronTreeT chronTree;
+    std::map<int, std::vector<std::string>> lexTree;
 
-    int append(ChronTreeT::Hash hash, Proofs &prf);
+    int append(int id, const std::string& node, ChronTreeT::Hash hash, Proofs &prf);
 
-    int merkle_test(){
+    void trace(int ID, std::vector<json> &lst);
+
+    int merkle_test() {
         std::string srcStr = "message", encodedHexStr;
 
         sha256(srcStr, encodedHexStr);
@@ -142,9 +152,16 @@ public:
     }
 };
 
+std::string get_timestamp(timeval &tv) {
+//    printf("%ld\t%ld\n", tv.tv_usec, tv.tv_sec);
+    std::string image_n = std::to_string(tv.tv_sec) + "_" + std::to_string(tv.tv_usec);
+    return image_n;
+}
 
-int LogTree::append(ChronTreeT::Hash hash, Proofs &prf) {
+int LogTree::append(int id, const std::string& node, ChronTreeT::Hash hash, Proofs &prf) {
     int ret = 0;
+    lexTree[id].push_back(node);
+//    std::cout << "---------" << id << ' ' << lexTree[id].size() << ' ' << chronTree.size() << std::endl;
     prf.node = hash;
     chronTree.insert(hash);
     prf.root = chronTree.root();
@@ -152,6 +169,18 @@ int LogTree::append(ChronTreeT::Hash hash, Proofs &prf) {
     return ret;
 }
 
+void LogTree::trace(int ID, std::vector<json> &lst) {
+    if (lexTree.find(ID) == lexTree.end()) {
+        return;
+    }
+
+    auto &vec = lexTree[ID];
+
+    for (auto & i : vec) {
+        lst.push_back(json::parse(i));
+    }
+    chronTree.path(chronTree.max_index());
+}
 
 
 #endif //LM_LOG_H

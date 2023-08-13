@@ -40,7 +40,7 @@ merklecpp-test.o: merklecpp-test.cpp bin
 	$(CXX) -c -o $(BIN)/$@ $<
 
 merklecpp-test: merklecpp-test.o
-	$(CXX) -o $(BIN)/$@ $(BIN)/$< -L. -lssl -lcrypto
+	$(CXX) -o $(BIN)/$@ $(BIN)/$< -L. -lssl -lcrypto -lpbc -lgmp
 
 bls-test.o: bls-test.cpp bin
 	$(CXX) -c -o $(BIN)/$@ $< -I$(BLS_DIR) -I$(DEP_DIR)

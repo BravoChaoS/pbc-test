@@ -10,7 +10,7 @@
 
 const char path[] = "param/aibe.param";
 const int rbits = 160;
-const int qbits = (4 << 6); // lambda
+const int qbits = 512; // lambda
 
 int main(int argc, char **argv) {
     FILE *file = fopen(path, "w+");
